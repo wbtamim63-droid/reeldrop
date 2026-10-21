@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#101014" />
+  <title>ReelDrop — Instagram Reel Downloader</title>
+  <style>
+    :root {
+      --bg: #101014;
+      --panel: #19191f;
+      --panel-2: #22222b;
+      --text: #f7f7fb;
+      --muted: #a6a6b4;
+      --line: rgba(255,255,255,.1);
+      --pink: #ff4d8d;
+      --orange: #ff9c54;
+      --green: #57d6a1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(ellipse at 10% 0%, rgba(255,77,141,.17), transparent 34rem),
+        radial-gradient(ellipse at 95% 20%, rgba(255,156,84,.12), transparent 30rem),
+        var(--bg);
+    }
+    a { color: inherit; }
+    .wrap { width: min(1080px, calc(100% - 36px)); margin: 0 auto; }
+    header { padding: 24px 0; }
+    .nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 800; font-size: 1.25rem; letter-spacing: -.04em; }
+    .brand-mark {
+      width: 39px; height: 39px; border-radius: 13px; display: grid; place-items: center;
+      background: linear-gradient(135deg, var(--pink), var(--orange)); color: white; font-size: 1.3rem;
+      box-shadow: 0 7px 24px rgba(255,77,141,.22);
+    }
+    .nav-note { color: var(--muted); font-size: .9rem; }
+    main { padding: 54px 0 76px; }
+    .hero { text-align: center; max-width: 780px; margin: 0 auto; }
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px;
+      border: 1px solid var(--line); background: rgba(255,255,255,.04); border-radius: 999px;
+      color: #ffd0e0; font-size: .82rem; font-weight: 650;
+    }
+    .eyebrow span { width: 7px; height: 7px; border-radius: 50%; background: var(--green); }
+    h1 { font-size: clamp(2.5rem, 7vw, 5.1rem); line-height: .99; letter-spacing: -.065em; margin: 24px 0 20px; }
+    h1 em { font-style: normal; background: linear-gradient(90deg, var(--pink), var(--orange)); color: transparent; background-clip: text; }
+    .subtitle { color: var(--muted); font-size: clamp(1rem, 2.3vw, 1.15rem); line-height: 1.7; max-width: 630px; margin: 0 auto; }
+    .downloader {
+      width: min(760px, 100%); margin: 38px auto 0; padding: 12px; border-radius: 22px;
+      border: 1px solid var(--line); background: rgba(25,25,31,.88); box-shadow: 0 24px 80px rgba(0,0,0,.25);
+      text-align: left;
+    }
+    .input-row { display: flex; gap: 10px; }
+    .input-wrap { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 0 14px; border: 1px solid var(--line); background: #111116; border-radius: 14px; }
+    .link-icon { color: var(--muted); font-size: 1.2rem; }
+    input {
+      width: 100%; min-width: 0; border: 0; outline: 0; padding: 17px 0; background: transparent;
+      color: var(--text); font: inherit; font-size: .96rem;
+    }
+    input::placeholder { color: #777785; }
+    button {
+      border: 0; cursor: pointer; font: inherit; font-weight: 750; border-radius: 14px;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button:focus-visible, input:focus-visible { outline: 2px solid #ff8db6; outline-offset: 3px; }
+    .primary { padding: 0 22px; color: white; background: linear-gradient(100deg, var(--pink), #ff785f); white-space: nowrap; }
+    .secondary { padding: 10px 14px; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); }
+    .helper { padding: 12px 7px 2px; color: var(--muted); font-size: .82rem; line-height: 1.5; }
+    .message { display: none; margin: 12px 7px 3px; border-radius: 12px; padding: 13px 14px; line-height: 1.5; font-size: .9rem; }
+    .message.show { display: block; }
+    .message.error { background: rgba(255,90,110,.1); border: 1px solid rgba(255,90,110,.25); color: #ffc2ca; }
+    .message.info { background: rgba(87,214,161,.08); border: 1px solid rgba(87,214,161,.22); color: #baf2db; }
+    .result { display: none; margin: 14px 7px 5px; padding: 15px; border: 1px solid var(--line); border-radius: 14px; background: rgba(255,255,255,.025); }
+    .result.show { display: block; }
+    .result-title { font-weight: 750; margin-bottom: 6px; }
+    .result p { margin: 0 0 12px; color: var(--muted); font-size: .9rem; line-height: 1.55; }
+    .result-actions { display: flex; gap: 9px; flex-wrap: wrap; }
+    .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 70px; }
+    .feature { padding: 22px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,.025); }
+    .feature-icon { width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px; background: rgba(255,77,141,.11); font-size: 1.25rem; margin-bottom: 17px; }
+    .feature h3 { margin: 0 0 9px; font-size: 1rem; }
+    .feature p { color: var(--muted); margin: 0; line-height: 1.6; font-size: .9rem; }
+    .how { margin: 66px auto 0; max-width: 780px; }
+    .section-heading { text-align: center; font-size: clamp(1.6rem, 4vw, 2.2rem); letter-spacing: -.04em; margin: 0 0 25px; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .step { text-align: center; padding: 20px 12px; }
+    .number { margin: 0 auto 13px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--panel-2); border: 1px solid var(--line); font-weight: 800; }
+    .step strong { display: block; margin-bottom: 7px; }
+    .step p { color: var(--muted); font-size: .88rem; line-height: 1.55; margin: 0; }
+    .notice { max-width: 760px; margin: 38px auto 0; padding: 16px 18px; border-radius: 14px; border: 1px solid var(--line); color: var(--muted); font-size: .85rem; line-height: 1.65; }
+    footer { padding: 25px 0 32px; border-top: 1px solid var(--line); color: var(--muted); font-size: .82rem; }
+    .footer-inner { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    @media (max-width: 650px) {
+      header { padding: 18px 0; }
+      .nav-note { display: none; }
+      main { padding: 38px 0 55px; }
+      .input-row { flex-direction: column; }
+      .input-wrap { width: 100%; }
+      .primary { min-height: 51px; }
+      .features { grid-template-columns: 1fr; margin-top: 48px; }
+      .feature { display: grid; grid-template-columns: 42px 1fr; column-gap: 13px; }
+      .feature-icon { grid-row: span 2; margin: 0; }
+      .feature h3 { align-self: end; }
+      .steps { grid-template-columns: 1fr; gap: 5px; }
+      .step { display: grid; grid-template-columns: 36px 1fr; text-align: left; column-gap: 13px; padding: 12px 0; }
+      .number { grid-row: span 2; margin: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <div class="brand"><div class="brand-mark">▶</div><span>ReelDrop</span></div>
+      <div class="nav-note">Simple • Fast • Mobile-friendly</div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="eyebrow"><span></span> Your simple Reel link tool</div>
+      <h1>Save your favorite<br /><em>Reels, simply.</em></h1>
+      <p class="subtitle">Paste a Reel link below to get started. For videos you own or have permission to save.</p>
+
+      <div class="downloader">
+        <form id="downloadForm">
+          <div class="input-row">
+            <label class="input-wrap" for="reelUrl">
+              <span class="link-icon" aria-hidden="true">↗</span>
+              <input id="reelUrl" type="url" placeholder="Paste Instagram Reel link here..." autocomplete="url" required />
+            </label>
+            <button class="primary" type="submit">Check link&nbsp; →</button>
+          </div>
+          <div class="helper">Example: https://www.instagram.com/reel/…</div>
+        </form>
+        <div id="message" class="message" role="status" aria-live="polite"></div>
+        <div id="result" class="result">
+          <div class="result-title" id="resultTitle">Link checked</div>
+          <p id="resultText"></p>
+          <div class="result-actions">
+            <a id="openLink" class="secondary" style="text-decoration:none;display:inline-flex;align-items:center" href="#" target="_blank" rel="noopener noreferrer">Open Reel ↗</a>
+            <button id="directDownload" class="secondary" type="button" hidden>Download direct video</button>
+            <button id="copyLink" class="secondary" type="button">Copy link</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" aria-label="Features">
+      <article class="feature">
+        <div class="feature-icon">🔗</div>
+        <h3>Easy link checking</h3>
+        <p>Paste a Reel URL and check that it looks like a valid Instagram link.</p>
+      </article>
+      <article class="feature">
+        <div class="feature-icon">📱</div>
+        <h3>Works on mobile</h3>
+        <p>A responsive layout designed for phones, tablets, and desktop browsers.</p>
+      </article>
+      <article class="feature">
+        <div class="feature-icon">🛡️</div>
+        <h3>Respect creator rights</h3>
+        <p>Use this tool for your own content or videos you have permission to save.</p>
+      </article>
+    </section>
+
+    <section class="how">
+      <h2 class="section-heading">How it works</h2>
+      <div class="steps">
+        <div class="step"><div class="number">1</div><strong>Copy the Reel link</strong><p>Use Instagram’s Share menu to copy a link.</p></div>
+        <div class="step"><div class="number">2</div><strong>Paste it here</strong><p>Paste the link and choose “Check link”.</p></div>
+        <div class="step"><div class="number">3</div><strong>Open or save</strong><p>Open the Reel, or download only if a direct video URL is available and you have permission.</p></div>
+      </div>
+    </section>
+
+    <div class="notice">
+      <strong style="color:var(--text)">Preview version:</strong> This static page validates Instagram Reel links and can download a direct video-file URL if you provide one. It cannot extract the actual video from an Instagram page by itself. A production downloader needs a lawful, reliable backend or API. Never enter your Instagram password into a third-party downloader.
+    </div>
+  </main>
+
+  <footer>
+    <div class="wrap footer-inner">
+      <span>© <span id="year"></span> ReelDrop</span>
+      <span>Independent demo — not affiliated with Instagram or Meta.</span>
+    </div>
+  </footer>
+
+  <script>
+    const form = document.getElementById('downloadForm');
+    const input = document.getElementById('reelUrl');
+    const message = document.getElementById('message');
+    const result = document.getElementById('result');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultText = document.getElementById('resultText');
+    const openLink = document.getElementById('openLink');
+    const copyButton = document.getElementById('copyLink');
+    const directDownload = document.getElementById('directDownload');
+    let checkedUrl = '';
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = 'message show ' + type;
+    }
+
+    function isInstagramReel(url) {
+      try {
+        const parsed = new URL(url);
+        const host = parsed.hostname.toLowerCase().replace(/^www\./, '');
+        return (host === 'instagram.com' || host === 'm.instagram.com') &&
+          /^\/(reel|reels|p)\/[A-Za-z0-9_-]+\/?/.test(parsed.pathname);
+      } catch {
+        return false;
+      }
+    }
+
+    function isDirectVideoUrl(url) {
+      try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'https:' &&
+          /\.(mp4|webm|mov)(?:$|[?#])/i.test(parsed.href);
+      } catch {
+        return false;
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const url = input.value.trim();
+      result.classList.remove('show');
+      directDownload.hidden = true;
+
+      if (!url) {
+        showMessage('Please paste a link first.', 'error');
+        return;
+      }
+
+      if (isDirectVideoUrl(url)) {
+        checkedUrl = url;
+        showMessage('Direct video-file URL detected. If you own the video or have permission, try downloading it below.', 'info');
+        resultTitle.textContent = 'Direct video link detected';
+        resultText.textContent = 'Your browser will attempt to open or download the video. Some hosts block downloads or require access permissions.';
+        openLink.href = url;
+        openLink.textContent = 'Open video ↗';
+        directDownload.hidden = false;
+        result.classList.add('show');
+        return;
+      }
+
+      if (!isInstagramReel(url)) {
+        showMessage('That link does not look like an Instagram Reel, post, or supported video URL. Please check it and try again.', 'error');
+        return;
+      }
+
+      checkedUrl = url;
+      showMessage('Instagram link looks valid. This preview cannot extract the video file from Instagram on its own.', 'info');
+      resultTitle.textContent = 'Reel link checked';
+      resultText.textContent = 'Open the Reel in Instagram. To enable automatic downloading, this website needs a backend/API that can lawfully access the video.';
+      openLink.href = url;
+      openLink.textContent = 'Open Reel ↗';
+      result.classList.add('show');
+    });
+
+    copyButton.addEventListener('click', async () => {
+      if (!checkedUrl) return;
+      try {
+        await navigator.clipboard.writeText(checkedUrl);
+        copyButton.textContent = 'Copied ✓';
+        setTimeout(() => { copyButton.textContent = 'Copy link'; }, 1600);
+      } catch {
+        input.focus();
+        input.select();
+        showMessage('Clipboard access was blocked. The link is selected—copy it manually.', 'info');
+      }
+    });
+
+    directDownload.addEventListener('click', () => {
+      if (!checkedUrl || !isDirectVideoUrl(checkedUrl)) return;
+      const a = document.createElement('a');
+      a.href = checkedUrl;
+      a.download = 'video';
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+  </script>
+</body>
+</html>
